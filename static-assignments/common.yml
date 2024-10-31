@@ -1,16 +1,15 @@
 ---
-- name: update web, nfs and db servers
-  hosts: webservers, nfs
+- name: update web, nfs, and db servers
+  hosts: webservers, nfs, db  # Choose the hosts you want to keep
   become: yes
   tasks:
     - name: ensure wireshark is at the latest version
       yum:
         name: wireshark
         state: latest
-   
 
-- name: update LB server
-  hosts: lb,db
+- name: update LB and db servers
+  hosts: lb, db  # Choose the hosts you want to keep
   become: yes
   tasks:
     - name: Update apt repo
