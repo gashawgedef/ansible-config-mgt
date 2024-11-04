@@ -1,7 +1,6 @@
 - name: Loadbalancers assignment
   hosts: lb
-  vars:
-    load_balancer_is_required: true
   tasks:
-    - import_playbook: ../static-assignments/loadbalancers.yml
+    - name: Import Load Balancer assignments
+      import_playbook: ../static-assignments/loadbalancers.yml
       when: load_balancer_is_required
