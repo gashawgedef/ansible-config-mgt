@@ -1,44 +1,60 @@
-pipeline {
-    agent any
+  pipeline {
+  agent any
+
+  environment {
+    ANSIBLE_CONFIG="${WORKSPACE}/deploy/ansible.cfg"
+    ANSIBLE_HOST_KEY_CHECKING = 'False'
+  }
 
   stages {
-    stage('Build') {
+    stage("Initial cleanup") {
       steps {
-        script {
-          sh 'echo "Building Stage"'
+        dir("${WORKSPACE}") {
+          deleteDir()
         }
       }
     }
 
-    stage('Test') {
+    stage('Checkout SCM') {
       steps {
-        script {
-          sh 'echo "Testing Stage"'
-        }
+        git branch: 'main', url: 'https://github.com/gashawgedef/ansible-config-mgt.git'
       }
     }
-      stage('Package') {
+
+    stage('Prepare Ansible For Execution') {
       steps {
-        script {
-          sh 'echo "Pckage Stage"'
-        }
+        sh 'echo ${WORKSPACE}'
+        sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'
       }
     }
-      stage('Deploy') {
+
+    stage('Test SSH Connection') {
       steps {
-        script {
-          sh 'echo "Deploy Stage"'
-        }
-      }
-    }
-      stage('Clean Up') {
-      steps {
-        script {
-          sh 'echo "Clean Up Stage"'
+        sshagent(['private-key']) {
+          sh 'ssh -o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/gashaw_key.pem ubuntu@172.31.22.35 exit'
         }
       }
     }
 
-
+    stage('Run Ansible playbook') {
+      steps {
+        sshagent(['private-key']) {
+          ansiblePlaybook(
+            become: true,
+            credentialsId: 'private-key',
+            disableHostKeyChecking: true,
+            installation: 'ansible',
+            inventory: "${WORKSPACE}/inventory/dev.yml",
+            playbook: "${WORKSPACE}/playbooks/site.yml"
+          )
+        }
+      }
     }
+
+    stage('Clean Workspace after build') {
+      steps {
+        cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true, deleteDirs: true)
+      }
+    }
+  }
 }
