@@ -15,13 +15,13 @@
         git branch: 'main', credentialsId: 'gashity_token', url: 'https://github.com/gashawgedef/ansible-config-mgt.git'
       }
     }
-      stage('Test SSH Connection') {
-      steps {
-        sshagent(['ansible']) {
-          sh 'ssh -o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/gashaw_key.pem ubuntur@172.31.22.35 exit'
-        }
-      }
-    }
+    //   stage('Test SSH Connection') {
+    //   steps {
+    //     sshagent(['ansible']) {
+    //       sh 'ssh -o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/gashaw_key.pem ubuntur@172.31.22.35 exit'
+    //     }
+    //   }
+    // }
    
 
 
