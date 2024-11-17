@@ -15,24 +15,22 @@
         git branch: 'main', credentialsId: 'gashity_token', url: 'https://github.com/gashawgedef/ansible-config-mgt.git'
       }
     }
-    stage('Prepare Ansible For Execution') {
-      steps {
-        sh 'echo ${WORKSPACE}'
-        sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'
-      }
-    }
-
     stage('Test SSH Connection') {
-    steps {
-                sshagent(['ansible']) { // Use the correct credential ID here
-                    sh '''
-                        echo "Testing SSH Connection..."
-                        ssh -o StrictHostKeyChecking=no ubuntu@172.31.22.35 exit
-                    '''
+            steps {
+                sshagent(['ansible']) {
+                    script {
+                        try {
+                            sh '''
+                                echo "Testing SSH Connection..."
+                                ssh -o StrictHostKeyChecking=no ubuntu@172.31.22.35 exit
+                            '''
+                        } catch (Exception e) {
+                            error("SSH Connection Test Failed: ${e}")
+                        }
+                    }
                 }
             }
-}
-
+        }
 
 
     stage('Run Ansible playbook') {
