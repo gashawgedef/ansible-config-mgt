@@ -25,7 +25,7 @@
     steps {
         sshagent(['private-key']) {
             sh '''
-                # Use the SSH private key set in Jenkins
+               
                 ssh -o StrictHostKeyChecking=no -i ~/.ssh/gashaw_key.pem ubuntu@172.31.22.35 exit
             '''
         }
