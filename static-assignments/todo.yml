@@ -1,5 +1,5 @@
 ---
 - hosts: todo
   roles:
-     - nginx
+     - mysql
   become: true

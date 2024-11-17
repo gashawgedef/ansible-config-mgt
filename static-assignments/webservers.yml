@@ -1,4 +1,4 @@
 ---
 - hosts: tooling
   roles:
-    - webserver
+    - /var/lib/jenkins/workspace/ansible-config-mgt_main/roles/webserver
