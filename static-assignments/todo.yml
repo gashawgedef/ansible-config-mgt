@@ -1,0 +1,5 @@
+---
+- hosts: todo
+  roles:
+     - nginx
+  become: true

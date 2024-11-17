@@ -5,3 +5,11 @@
 [todo]
 172.31.20.62 ansible_ssh_user=ec2-user
 
+# # [nginx]
+# # 172.31.22.203 ansible_ssh_user='ubuntu' 
+
+# [db]
+# 172.31.26.78 ansible_ssh_user='ec2-user' 
+
+# # [tooling]
+# # 172.31.16.232 ansible_ssh_user='ec2-user' 
