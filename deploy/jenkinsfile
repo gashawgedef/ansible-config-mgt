@@ -19,6 +19,15 @@ pipeline {
                 }
             }
         }
+        stage('Validate Ansible Configuration') {
+    steps {
+        sh '''
+        echo "Validating ansible.cfg content:"
+        cat $WORKSPACE/deploy/ansible.cfg
+        '''
+    }
+}
+
 
         stage('Run Ansible playbook') {
             steps {
