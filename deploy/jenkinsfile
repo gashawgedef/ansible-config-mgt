@@ -24,7 +24,7 @@
 
     stage('Test SSH Connection') {
     steps {
-        sshagent(['private-key']) {
+        sshagent(['ansible']) {
             script {
                 // Debugging: Output SSH agent info
                 sh 'echo "Testing SSH Connection"'
