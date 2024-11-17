@@ -26,6 +26,11 @@
        ansiblePlaybook credentialsId: 'private_key', disableHostKeyChecking: true, installation: 'Ansible-Path', inventory: 'inventory/dev.yml', playbook: 'playbooks/site.yml', vaultTmpPath: ''
       }
     }
+      stage('Clean Workspace after build') {
+      steps {
+        cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true, deleteDirs: true)
+      }
+    }
 
 
 
