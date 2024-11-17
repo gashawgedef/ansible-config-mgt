@@ -17,7 +17,7 @@
 
     stage('Checkout SCM') {
       steps {
-        git branch: 'main', url: 'https://github.com/gashawgedef/ansible-config-mgt.git'
+        git branch: 'main', credentialsId: 'gashity_token', url: 'https://github.com/gashawgedef/ansible-config-mgt.git'
       }
     }
 
@@ -28,26 +28,11 @@
       }
     }
 
-    stage('Test SSH Connection') {
-      steps {
-        sshagent(['private-key']) {
-          sh 'ssh -o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/gashaw_key.pem ubuntu@172.31.22.35 exit'
-        }
-      }
-    }
+  
 
     stage('Run Ansible playbook') {
       steps {
-        sshagent(['private-key']) {
-          ansiblePlaybook(
-            become: true,
-            credentialsId: 'private-key',
-            disableHostKeyChecking: true,
-            installation: 'ansible',
-            inventory: "${WORKSPACE}/inventory/dev.yml",
-            playbook: "${WORKSPACE}/playbooks/site.yml"
-          )
-        }
+       ansiblePlaybook credentialsId: 'private_key', disableHostKeyChecking: true, installation: 'Ansible-Path', inventory: 'inventory/dev.yml', playbook: 'playbooks/site.yml', vaultTmpPath: ''
       }
     }
 
