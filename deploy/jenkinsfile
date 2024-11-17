@@ -17,7 +17,7 @@
     }
       stage('Test SSH Connection') {
             steps {
-                sshagent(['ansible']) {  // 'ansible' is the ID of the credentials
+                sshagent(['private_key']) {  // 'ansible' is the ID of the credentials
                     sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.22.35 exit'
                 }
             }
