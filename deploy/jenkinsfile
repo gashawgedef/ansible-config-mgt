@@ -16,12 +16,12 @@
       }
     }
       stage('Test SSH Connection') {
-      steps {
-        sshagent(['ansible']) {
-          sh 'ssh -o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/gashaw_key.pem ubuntur@172.31.22.35 exit'
+            steps {
+                sshagent(['ansible']) {  // 'ansible' is the ID of the credentials
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.22.35 exit'
+                }
+            }
         }
-      }
-    }
    
 
 
