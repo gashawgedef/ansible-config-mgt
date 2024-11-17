@@ -1,57 +1,50 @@
-  pipeline {
+pipeline {
     agent any
 
-  stages {
-     stage("Initial cleanup") {
-      steps {
-        dir("${WORKSPACE}") {
-          deleteDir()
+    stages {
+        stage("Initial cleanup") {
+            steps {
+                dir("${WORKSPACE}") {
+                    deleteDir()
+                }
+            }
         }
-      }
-    }
 
-    stage('Checkout SCM') {
-      steps {
-        git branch: 'main', credentialsId: 'gashity_token', url: 'https://github.com/gashawgedef/ansible-config-mgt.git'
-      }
-    }
-      stage('Test SSH Connection') {
-      steps {
-        sshagent(['ansible']) {
-          sh 'ssh -o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/gashaw_key.pem ubuntur@172.31.22.35 exit'
+        stage('Checkout SCM') {
+            steps {
+                git branch: 'main', credentialsId: 'gashity_token', url: 'https://github.com/gashawgedef/ansible-config-mgt.git'
+            }
         }
-      }
-    }
-    // stage('Test SSH Connection') {
-    //         steps {
-    //             sshagent(['ansible']) {
-    //                 script {
-    //                     try {
-    //                         sh '''
-    //                             echo "Testing SSH Connection..."
-    //                             ssh -o StrictHostKeyChecking=no ubuntu@172.31.22.35 exit
-    //                         '''
-    //                     } catch (Exception e) {
-    //                         error("SSH Connection Test Failed: ${e}")
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
 
+        stage('Test SSH Connection') {
+            steps {
+                sshagent(['ansible']) {
+                    script {
+                        try {
+                            sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.22.35 exit'
+                        } catch (Exception e) {
+                            error("SSH Connection Test Failed: ${e}")
+                        }
+                    }
+                }
+            }
+        }
 
-    stage('Run Ansible playbook') {
-      steps {
-       ansiblePlaybook credentialsId: 'private_key', disableHostKeyChecking: true, installation: 'Ansible-Path', inventory: 'inventory/dev.yml', playbook: 'playbooks/site.yml', vaultTmpPath: ''
-      }
-    }
-      stage('Clean Workspace after build') {
-      steps {
-        cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true, deleteDirs: true)
-      }
-    }
+        stage('Run Ansible playbook') {
+            steps {
+                ansiblePlaybook credentialsId: 'private_key',
+                                disableHostKeyChecking: true,
+                                installation: 'Ansible-Path',
+                                inventory: 'inventory/dev.yml',
+                                playbook: 'playbooks/site.yml',
+                                vaultTmpPath: ''
+            }
+        }
 
-
-
+        stage('Clean Workspace after build') {
+            steps {
+                cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true, deleteDirs: true)
+            }
+        }
     }
 }
