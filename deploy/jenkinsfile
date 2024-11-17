@@ -24,16 +24,13 @@
 
     stage('Test SSH Connection') {
     steps {
-        sshagent(['ansible']) {
-            script {
-                // Debugging: Output SSH agent info
-                sh 'echo "Testing SSH Connection"'
-                sh '''
-                    ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/gashaw_key.pem ubuntu@172.31.22.35 exit
-                '''
+                sshagent(['ansible']) { // Use the correct credential ID here
+                    sh '''
+                        echo "Testing SSH Connection..."
+                        ssh -o StrictHostKeyChecking=no ubuntu@172.31.22.35 exit
+                    '''
+                }
             }
-        }
-    }
 }
 
 
