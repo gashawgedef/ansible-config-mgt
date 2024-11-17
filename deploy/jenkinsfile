@@ -21,6 +21,11 @@
         sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'
       }
     }
+    stage('Run Ansible playbook') {
+      steps {
+       ansiblePlaybook credentialsId: 'private_key', disableHostKeyChecking: true, installation: 'Ansible-Path', inventory: 'inventory/dev.yml', playbook: 'playbooks/site.yml', vaultTmpPath: ''
+      }
+    }
 
 
 
