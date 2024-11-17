@@ -10,23 +10,23 @@ pipeline {
             }
         }
 
-        stage('Test SSH Connection') {
-            steps {
-                sshagent(['private-key']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/gashaw_key.pem ubuntu@172.31.22.35 exit
-                    '''
-                }
-            }
-        }
-        stage('Validate Ansible Configuration') {
-    steps {
-        sh '''
-        echo "Validating ansible.cfg content:"
-        cat $WORKSPACE/deploy/ansible.cfg
-        '''
-    }
-}
+//         stage('Test SSH Connection') {
+//             steps {
+//                 sshagent(['private-key']) {
+//                     sh '''
+//                     ssh -o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/gashaw_key.pem ubuntu@172.31.22.35 exit
+//                     '''
+//                 }
+//             }
+//         }
+//         stage('Validate Ansible Configuration') {
+//     steps {
+//         sh '''
+//         echo "Validating ansible.cfg content:"
+//         cat $WORKSPACE/deploy/ansible.cfg
+//         '''
+//     }
+// }
 
 
         // stage('Run Ansible playbook') {
