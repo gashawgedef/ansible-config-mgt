@@ -171,19 +171,17 @@ pipeline {
             }
         }
 
-        stage('Run Ansible Playbook') {
-            steps {
-                ansiblePlaybook credentialsId: 'private_key',
-                                disableHostKeyChecking: true,
-                                installation: 'ansible-config-mgt',
-                                inventory: "${WORKSPACE}/inventory/${inventory}.yml",
-                                playbook: "${WORKSPACE}/playbooks/site.yml",
-                                vaultTmpPath: '',
-                                extraVars: [
-                                    'ansible_tag': "${ansible_tag}" // Pass dynamic tag as a variable
-                                ]
-            }
-        }
+       stage('Run Ansible Playbook') {
+    steps {
+        ansiblePlaybook credentialsId: 'private_key',
+                        disableHostKeyChecking: true,
+                        installation: 'ansible-config-mgt',
+                        inventory: "${WORKSPACE}/inventory/${inventory}.yml",
+                        playbook: "${WORKSPACE}/playbooks/site.yml",
+                        vaultTmpPath: ''
+    }
+}
+
 
         stage('Clean Workspace After Build') {
             steps {
