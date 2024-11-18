@@ -48,8 +48,8 @@ pipeline {
               installation: 'ansible-config-mgt',
               inventory: "${WORKSPACE}/inventory/${inventory}.yml",
               playbook: "${WORKSPACE}/playbooks/site.yml",
-              extraVars: "",
-              options: '--tags webserver'
+              extraVars: [webserver_tag: 'webserver'], // Use a map for extraVars
+              extras: '--tags webserver' // Use 'extras' for passing options
               // vaultTmpPath: '',
               // extraVars: [ansible_tags: 'webserver'] // Limit execution to the webserver role only
     }
