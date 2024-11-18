@@ -163,10 +163,10 @@ pipeline {
             }
         }
 
-        stage('Test SSH Connection') {
+       stage('Test SSH Connection') {
             steps {
                 sshagent(['private_key']) { // Ensure 'private_key' is correctly configured in Jenkins
-                    sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.22.35 exit'
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.22.35 exit'
                 }
             }
         }
