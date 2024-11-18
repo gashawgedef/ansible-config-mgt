@@ -1,5 +1,9 @@
   pipeline {
     agent any
+    environment {
+    ANSIBLE_CONFIG="${WORKSPACE}/deploy/ansible.cfg"
+    ANSIBLE_HOST_KEY_CHECKING = 'False'
+  }
   parameters {
       string(name: 'inventory', defaultValue: 'dev',  description: 'This is the inventory file for the environment to deploy configuration')
     }
