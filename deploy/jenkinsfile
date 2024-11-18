@@ -1,67 +1,123 @@
-  pipeline {
+//   pipeline {
+//     agent any
+//     environment {
+//     ANSIBLE_CONFIG="${WORKSPACE}/deploy/ansible.cfg"
+//     ANSIBLE_HOST_KEY_CHECKING = 'False'
+//   }
+//   parameters {
+//       string(name: 'inventory', defaultValue: 'dev',  description: 'This is the inventory file for the environment to deploy configuration')
+//     }
+//   stages {
+//      stage("Initial cleanup") {
+//       steps {
+//         dir("${WORKSPACE}") {
+//           deleteDir()
+//         }
+//       }
+//     }
+
+//     stage('Checkout SCM') {
+//       steps {
+//         git branch: 'main', credentialsId: 'gashity_token', url: 'https://github.com/gashawgedef/ansible-config-mgt.git'
+//       }
+//     }
+//       stage('Test SSH Connection') {
+//             steps {
+//                 sshagent(['private_key']) {  // 'ansible' is the ID of the credentials
+//                     sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.22.35 exit'
+//                 }
+//             }
+//         }
+   
+
+
+//     // stage('Run Ansible playbook') {
+//     //   steps {
+//     //    ansiblePlaybook credentialsId: 'private_key', 
+//     //    disableHostKeyChecking: true,
+//     //    installation: 'ansible-config-mgt', 
+//     //    inventory: "${WORKSPACE}/${inventory}", 
+//     //    playbook: "${WORKSPACE}/playbooks/site.yml",
+//     //    vaultTmpPath: ''
+//     //   }
+//     // }
+
+//       stage('Run Ansible playbook') {
+//             steps {
+//                 // Run Ansible playbook with dynamic inventory and tag
+//                 ansiblePlaybook credentialsId: 'private_key',
+//                                  disableHostKeyChecking: true,
+//                                  installation: 'ansible-config-mgt',
+//                                  inventory: "${WORKSPACE}/${inventory}", // Use the dynamic inventory parameter
+//                                  playbook: "${WORKSPACE}/playbooks/site.yml",
+//                                  vaultTmpPath: '',
+//                                  extraVars: [
+//                                      'ansible_tag': "${ansible_tag}"  // Pass the tag parameter to limit execution
+//                                  ]
+//             }
+//         }
+//       stage('Clean Workspace after build') {
+//       steps {
+//         cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true, deleteDirs: true)
+//       }
+//     }
+
+
+//     }
+// }
+pipeline {
     agent any
     environment {
-    ANSIBLE_CONFIG="${WORKSPACE}/deploy/ansible.cfg"
-    ANSIBLE_HOST_KEY_CHECKING = 'False'
-  }
-  parameters {
-      string(name: 'inventory', defaultValue: 'dev',  description: 'This is the inventory file for the environment to deploy configuration')
+        ANSIBLE_CONFIG = "${WORKSPACE}/deploy/ansible.cfg"
+        ANSIBLE_HOST_KEY_CHECKING = 'False'
     }
-  stages {
-     stage("Initial cleanup") {
-      steps {
-        dir("${WORKSPACE}") {
-          deleteDir()
-        }
-      }
+    parameters {
+        string(name: 'inventory', defaultValue: 'dev', description: 'Inventory file for the environment to deploy configuration')
+        string(name: 'ansible_tag', defaultValue: 'all', description: 'Ansible tag to limit playbook execution')
     }
-
-    stage('Checkout SCM') {
-      steps {
-        git branch: 'main', credentialsId: 'gashity_token', url: 'https://github.com/gashawgedef/ansible-config-mgt.git'
-      }
-    }
-      stage('Test SSH Connection') {
+    stages {
+        stage("Initial Cleanup") {
             steps {
-                sshagent(['private_key']) {  // 'ansible' is the ID of the credentials
+                dir("${WORKSPACE}") {
+                    deleteDir() // Clean the workspace to avoid residual files
+                }
+            }
+        }
+
+        stage('Checkout SCM') {
+            steps {
+                git branch: 'main', 
+                    credentialsId: 'gashity_token', 
+                    url: 'https://github.com/gashawgedef/ansible-config-mgt.git'
+            }
+        }
+
+        stage('Test SSH Connection') {
+            steps {
+                sshagent(['private_key']) { // Ensure 'private_key' is correctly configured in Jenkins
                     sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.22.35 exit'
                 }
             }
         }
-   
 
-
-    // stage('Run Ansible playbook') {
-    //   steps {
-    //    ansiblePlaybook credentialsId: 'private_key', 
-    //    disableHostKeyChecking: true,
-    //    installation: 'ansible-config-mgt', 
-    //    inventory: "${WORKSPACE}/${inventory}", 
-    //    playbook: "${WORKSPACE}/playbooks/site.yml",
-    //    vaultTmpPath: ''
-    //   }
-    // }
-
-      stage('Run Ansible playbook') {
+        stage('Run Ansible Playbook') {
             steps {
-                // Run Ansible playbook with dynamic inventory and tag
                 ansiblePlaybook credentialsId: 'private_key',
-                                 disableHostKeyChecking: true,
-                                 installation: 'ansible-config-mgt',
-                                 inventory: "${WORKSPACE}/${inventory}", // Use the dynamic inventory parameter
-                                 playbook: "${WORKSPACE}/playbooks/site.yml",
-                                 vaultTmpPath: '',
-                                 extraVars: [
-                                     'ansible_tag': "${ansible_tag}"  // Pass the tag parameter to limit execution
-                                 ]
+                                disableHostKeyChecking: true,
+                                installation: 'ansible', // Ensure 'ansible' installation name matches Jenkins global tool configuration
+                                inventory: "${WORKSPACE}/inventory/${inventory}", // Dynamically reference inventory
+                                playbook: "${WORKSPACE}/playbooks/site.yml", // Ensure playbook path is correct
+                                vaultTmpPath: '',
+                                extraVars: [
+                                    'ansible_tag': "${ansible_tag}" // Pass dynamic tag as a variable
+                                ]
             }
         }
-      stage('Clean Workspace after build') {
-      steps {
-        cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true, deleteDirs: true)
-      }
-    }
 
-
+        stage('Clean Workspace After Build') {
+            steps {
+                cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true, deleteDirs: true)
+            }
+        }
     }
 }
