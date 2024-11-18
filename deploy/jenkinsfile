@@ -15,6 +15,13 @@
         }
       }
     }
+      stage('Print Workspace') {
+            steps {
+                script {
+                    echo "The current workspace is: ${env.WORKSPACE}"
+                }
+            }
+        }
 
     stage('Checkout SCM') {
       steps {
