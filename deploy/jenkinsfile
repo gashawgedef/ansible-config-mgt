@@ -50,8 +50,7 @@ pipeline {
               playbook: "${WORKSPACE}/playbooks/site.yml",
               extraVars: [webserver_tag: 'webserver'], // Use a map for extraVars
               extras: '--tags webserver' // Use 'extras' for passing options
-              // vaultTmpPath: '',
-              // extraVars: [ansible_tags: 'webserver'] // Limit execution to the webserver role only
+             
     }
 }
 
