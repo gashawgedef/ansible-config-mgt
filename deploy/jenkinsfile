@@ -48,6 +48,8 @@ pipeline {
               installation: 'ansible-config-mgt',
               inventory: "${WORKSPACE}/inventory/${inventory}.yml",
               playbook: "${WORKSPACE}/playbooks/site.yml",
+
+              // # introduce tagging in Ansible
               extraVars: [webserver_tag: 'webserver'], // Use a map for extraVars
               extras: '--tags webserver' // Use 'extras' for passing options
              
