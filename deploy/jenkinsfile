@@ -136,7 +136,7 @@ pipeline {
     }
     parameters {
         string(name: 'inventory', defaultValue: 'dev', description: 'Inventory file for the environment to deploy configuration')
-        string(name: 'ansible_tag', defaultValue: 'all', description: 'Ansible tag to limit playbook execution')
+       
     }
     stages {
         stage("Initial Cleanup") {
