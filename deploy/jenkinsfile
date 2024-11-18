@@ -36,8 +36,8 @@
        ansiblePlaybook credentialsId: 'private_key', 
        disableHostKeyChecking: true,
        installation: 'ansible-config-mgt', 
-       inventory: "${inventory}", 
-       playbook: 'playbooks/site.yml',
+       inventory: "${WORKSPACE}/${inventory}", 
+       playbook: "${WORKSPACE}/playbooks/site.yml",
        vaultTmpPath: ''
       }
     }
