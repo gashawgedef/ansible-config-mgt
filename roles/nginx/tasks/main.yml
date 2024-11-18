@@ -1,25 +1,52 @@
 ---
-# tasks file for roles/nginx
-- name: Install nginx
-  become: yes
-  apt:
+# Install Nginx
+- name: Ensure Nginx is installed
+  yum:
     name: nginx
     state: present
-    update_cache: yes
+  become: yes  # Ensure the task runs with sudo/root privileges
 
- 
-
-- name: Insert configuration file in server block
+# Ensure Nginx is enabled and started
+- name: Ensure Nginx is enabled and running
+  service:
+    name: nginx
+    state: started
+    enabled: yes
   become: yes
-  blockinfile:
-     path: /etc/nginx/nginx.conf
-     block: "{{ lookup('file', '../templates/nginx.conf' ) }}"
-     insertafter: "http {"
 
+# Deploy Nginx configuration file
+- name: Deploy Nginx configuration
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Nginx
 
-- name: Comment out site-enabled
+# Ensure the Nginx configuration is valid
+- name: Validate Nginx configuration
+  command: nginx -t
+  register: nginx_config_test
+  changed_when: false
+  failed_when: nginx_config_test.rc != 0
+
+# Create a directory for the website (optional)
+- name: Create website root directory
+  file:
+    path: /usr/share/nginx/html/my_website
+    state: directory
+    owner: nginx
+    group: nginx
+    mode: '0755'
   become: yes
-  replace:
-     path: /etc/nginx/nginx.conf
-     regexp: '(.*enabled.*)'
-     replace: '#\1'
+
+# Deploy index.html (optional)
+- name: Deploy website index.html
+  copy:
+    src: index.html
+    dest: /usr/share/nginx/html/my_website/index.html
+    owner: nginx
+    group: nginx
+    mode: '0644'
+  become: yes
