@@ -31,16 +31,31 @@
    
 
 
-    stage('Run Ansible playbook') {
-      steps {
-       ansiblePlaybook credentialsId: 'private_key', 
-       disableHostKeyChecking: true,
-       installation: 'ansible-config-mgt', 
-       inventory: "${WORKSPACE}/${inventory}", 
-       playbook: "${WORKSPACE}/playbooks/site.yml",
-       vaultTmpPath: ''
-      }
-    }
+    // stage('Run Ansible playbook') {
+    //   steps {
+    //    ansiblePlaybook credentialsId: 'private_key', 
+    //    disableHostKeyChecking: true,
+    //    installation: 'ansible-config-mgt', 
+    //    inventory: "${WORKSPACE}/${inventory}", 
+    //    playbook: "${WORKSPACE}/playbooks/site.yml",
+    //    vaultTmpPath: ''
+    //   }
+    // }
+
+      stage('Run Ansible playbook') {
+            steps {
+                // Run Ansible playbook with dynamic inventory and tag
+                ansiblePlaybook credentialsId: 'private_key',
+                                 disableHostKeyChecking: true,
+                                 installation: 'ansible-config-mgt',
+                                 inventory: "${WORKSPACE}/inventory/${inventory}.yml", // Use the dynamic inventory parameter
+                                 playbook: "${WORKSPACE}/playbooks/site.yml",
+                                 vaultTmpPath: '',
+                                 extraVars: [
+                                     'ansible_tag': "${ansible_tag}"  // Pass the tag parameter to limit execution
+                                 ]
+            }
+        }
       stage('Clean Workspace after build') {
       steps {
         cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true, deleteDirs: true)
