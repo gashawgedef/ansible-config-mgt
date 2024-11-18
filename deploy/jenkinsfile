@@ -49,7 +49,7 @@ pipeline {
               inventory: "${WORKSPACE}/inventory/${inventory}.yml",
               playbook: "${WORKSPACE}/playbooks/site.yml",
               vaultTmpPath: '',
-               options: '--tags webserver' // Limit execution to the webserver role only
+              extraVars: [ansible_tags: 'webserver'] // Limit execution to the webserver role only
     }
 }
 
