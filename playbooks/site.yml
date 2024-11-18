@@ -1,40 +1,17 @@
-# # ---
-# # - name: Loadbalancers assignment
-# #   hosts: lb
-# #   tasks:
-# #     - name: Check if load balancer is required
-# #       set_fact:
-# #         load_balancer_is_required: true  # or some condition
 
-# #     - name: Import Load Balancer assignments
-# #       include_tasks: ../static-assignments/loadbalancers.yml
-# #       when: load_balancer_is_required
-# # loadbalancers.yml
-# - name: Assign Nginx load balancer
-#   include_role:
-#     name: nginx
-#   when: enable_nginx_lb and load_balancer_is_required
+[tooling]
+172.31.31.182 ansible_ssh_user=ec2-user
 
-# - name: Assign Apache load balancer
-#   include_role:
-#     name: apache
-#   when: enable_apache_lb and load_balancer_is_required
+[todo]
+172.31.20.62 ansible_ssh_user=ec2-user
 
-# sites.yml
-# - name: Loadbalancers assignment
-#   hosts: lb
-#   tasks:
-#     - name: Check if load balancer is required
-#       set_fact:
-#         load_balancer_is_required: true  # or some condition
 
-#     - name: Import Load Balancer assignments
-#       include_tasks: ../static-assignments/loadbalancers.yml
-#       when: load_balancer_is_required
+[nginx]
+172.31.30.169 ansible_ssh_user=ec2-user
 
----
-- name: tooling
-  import_playbook: ../static-assignments/webservers.yml
+[db:vars]
+ansible_user=ec2-user
+ansible_python_interpreter=/usr/bin/python
 
-- name: todo
-  import_playbook: ../static-assignments/todo.yml
+[db]
+172.31.31.121 ansible_ssh_user=ec2-user
