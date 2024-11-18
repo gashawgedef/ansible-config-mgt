@@ -1,5 +1,5 @@
 ---
 - hosts: todo
   roles:
-     - /var/lib/jenkins/workspace/ansible-config-mgt_main/roles/mysql
+     - nginx
   become: true
