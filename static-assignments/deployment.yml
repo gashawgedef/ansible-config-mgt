@@ -1,35 +1,35 @@
 ---
-- name: Deploying the PHP Applicaion to Dev Enviroment
+- name: Deploying the PHP Application to Dev Environment
   become: true
   hosts: todo
 
   tasks:
-    - name: install remi and rhel repo
-      ansible.builtin.yum:
-        name: 
-          - https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-          - dnf-utils
-          - http://rpms.remirepo.net/enterprise/remi-release-8.rpm
-        disable_gpg_check: yes
+    - name: Enable required repositories
+      ansible.builtin.shell: |
+        dnf install -y epel-release
+        dnf install -y dnf-utils
+      args:
+        warn: false
 
-    
-    - name: install httpd on the webserver
-      ansible.builtin.yum:
-        name: httpd
-        state: present
-
-    - name: ensure httpd is started and enabled
-      ansible.builtin.service:
-        name: httpd
-        state: started 
-        enabled: yes
-      
-    - name: install PHP
+    - name: Install remi and rhel repo
       ansible.builtin.yum:
         name:
-          - php 
+          - https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+          - http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+        state: present
+        disable_gpg_check: yes
+
+    - name: Enable remi-php74 repo
+      ansible.builtin.shell: |
+        dnf module reset php -y
+        dnf module enable php:remi-7.4 -y
+
+    - name: Install PHP and dependencies
+      ansible.builtin.yum:
+        name:
+          - php
           - php-mysqlnd
-          - php-gd 
+          - php-gd
           - php-curl
           - unzip
           - php-common
@@ -39,8 +39,10 @@
           - php-xml
           - php-fpm
           - php-json
-        enablerepo: php:remi-7.4
         state: present
+
+    # Rest of the tasks remain unchanged...
+
     
     - name: ensure php-fpm is started and enabled
       ansible.builtin.service:
