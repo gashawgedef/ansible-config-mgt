@@ -1,81 +1,83 @@
 ---
+---
 - name: Deploying the PHP Application to Dev Environment
   become: true
   hosts: todo
 
   tasks:
-    - name: Enable required repositories
-      ansible.builtin.shell: |
-        dnf install -y epel-release
-        dnf install -y dnf-utils
-      args:
-        warn: false
+    - name: Enable EPEL repository
+      ansible.builtin.yum_repository:
+        name: epel
+        description: "Extra Packages for Enterprise Linux"
+        baseurl: https://dl.fedoraproject.org/pub/epel/$releasever/Everything/$basearch/
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
 
-    - name: Install remi and rhel repo
+    - name: Enable Remi repository
+      ansible.builtin.yum_repository:
+        name: remi
+        description: "Remi's RPM repository"
+        baseurl: http://rpms.remirepo.net/enterprise/8/remi/$basearch/
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://rpms.remirepo.net/RPM-GPG-KEY-remi
+
+    - name: Install necessary packages
       ansible.builtin.yum:
         name:
-          - https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-          - http://rpms.remirepo.net/enterprise/remi-release-8.rpm
-        state: present
-        disable_gpg_check: yes
-
-    - name: Enable remi-php74 repo
-      ansible.builtin.shell: |
-        dnf module reset php -y
-        dnf module enable php:remi-7.4 -y
-
-    - name: Install PHP and dependencies
-      ansible.builtin.yum:
-        name:
+          - dnf-utils
+          - httpd
           - php
           - php-mysqlnd
           - php-gd
           - php-curl
-          - unzip
           - php-common
           - php-mbstring
           - php-opcache
           - php-intl
           - php-xml
           - php-fpm
-          - php-json
+          - unzip
         state: present
+        enablerepo: remi
 
-    # Rest of the tasks remain unchanged...
-
-    
-    - name: ensure php-fpm is started and enabled
+    - name: Ensure httpd service is started and enabled
       ansible.builtin.service:
-        name: php-fpm
-        state: started 
+        name: httpd
+        state: started
         enabled: yes
 
-    - name: Download the artifact
-      get_url:
+    - name: Ensure php-fpm service is started and enabled
+      ansible.builtin.service:
+        name: php-fpm
+        state: started
+        enabled: yes
+
+    - name: Download the application artifact
+      ansible.builtin.get_url:
         url: http://44.211.225.131:8081/artifactory/todo-dev-local/php-todo59/php-todo.zip
-        dest: /home/ec2-user/
-        url_username: admin
-        url_password: Enzakuna12@21
+        dest: /home/ec2-user/php-todo.zip
+        mode: '0644'
 
-    - name: unzip the artifacts
+    - name: Unzip the application artifact
       ansible.builtin.unarchive:
-       src: /home/ec2-user/php-todo
-       dest: /home/ec2-user/
-       remote_src: yes
-
-    - name: deploy the code
-      ansible.builtin.copy:
-        src: /home/ec2-user/var/lib/jenkins/workspace/php-todo_main/
-        dest: /var/www/html/
-        force: yes
+        src: /home/ec2-user/php-todo.zip
+        dest: /home/ec2-user/
         remote_src: yes
 
-    - name: remove nginx default page
+    - name: Deploy the application to the web root
+      ansible.builtin.copy:
+        src: /home/ec2-user/php-todo/
+        dest: /var/www/html/
+        remote_src: yes
+
+    - name: Remove the default nginx page
       ansible.builtin.file:
         path: /etc/httpd/conf.d/welcome.conf
         state: absent
 
-    - name: restart httpd
+    - name: Restart httpd service to apply changes
       ansible.builtin.service:
         name: httpd
         state: restarted
