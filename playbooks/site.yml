@@ -37,4 +37,4 @@
   import_playbook: ../static-assignments/webservers.yml
 
 - name: todo
-  import_playbook: ../static-assignments/todo.yml
+  import_playbook: ../static-assignments/deployment.yml
