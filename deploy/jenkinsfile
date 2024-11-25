@@ -49,8 +49,8 @@ pipeline {
 
               // # introduce tagging in Ansible
               
-            //   extraVars: [webserver_tag: 'webserver'], // Use a map for extraVars
-            //   extras: '--tags webserver' // Use 'extras' for passing options
+              extraVars: [webserver_tag: 'webserver'], // Use a map for extraVars
+              extras: '--tags webserver' // Use 'extras' for passing options
              
     }
 }
