@@ -1,5 +1,4 @@
 ---
----
 - name: Deploying the PHP Application to Dev Environment
   become: true
   hosts: todo
