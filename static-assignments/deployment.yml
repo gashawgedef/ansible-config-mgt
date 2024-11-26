@@ -1,40 +1,93 @@
 ---
-- name: Deploy php-todo application from Artifactory
-  hosts: all
+- name: Deploy Todo application
+  hosts: todo
+  become: true
   vars:
-    artifact_url: "http://54.196.86.61:8081/artifactory/todo-dev-local/php-todo{{ build_number }}/php-todo.zip"  # Customize the URL as per your structure
-    deploy_path: "/var/www/php-todo"
+    artifact_url: "http://54.196.86.61:8081/artifactory/todo-dev-local/php-todo{{ build_number }}/php-todo.zip"
+    deploy_path: "/var/www/todo"
+    php_version: "php-7.4"
+    web_server_package: "nginx"  # Change to "apache" if you're using Apache
   tasks:
+
+    # Step 1: Update package index and install required packages
+    - name: Update apt cache (Debian/Ubuntu) or yum (RHEL/CentOS)
+      package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - unzip
+        - wget
+        - curl
+        - git
+        - "{{ php_version }}"
+        - "{{ web_server_package }}"
+
+    # Step 2: Download the application from Artifactory
     - name: Download artifact from Artifactory
       get_url:
         url: "{{ artifact_url }}"
         dest: "/tmp/php-todo.zip"
         headers:
-          Authorization: "Basic {{ lookup('env', 'ARTIFACTORY_API_KEY') }}"  # Use your API key or Basic Auth token if required
+          Authorization: "Basic {{ lookup('env', 'ARTIFACTORY_API_KEY') }}"
       register: download_artifact
       failed_when: download_artifact.status != 200
       retries: 3
       delay: 10
       timeout: 300
 
-    - name: Unzip artifact to deployment directory
+    # Step 3: Unzip the application
+    - name: Unzip the todo application
       unarchive:
         src: "/tmp/php-todo.zip"
         dest: "{{ deploy_path }}"
         remote_src: yes
 
-    - name: Set permissions for the deployed files
+    # Step 4: Set correct permissions
+    - name: Set permissions for the todo application
       file:
         path: "{{ deploy_path }}"
-        mode: '0755'
         recurse: yes
+        mode: '0755'
 
+    # Step 5: Install and configure web server (nginx or apache)
+    - name: Ensure web server is running
+      service:
+        name: "{{ web_server_package }}"
+        state: started
+        enabled: true
+
+    # Step 6: Configure Nginx (if nginx is used)
+    - name: Configure Nginx for PHP Todo
+      template:
+        src: "nginx-todo.conf.j2"
+        dest: "/etc/nginx/sites-available/todo"
+      notify:
+        - Reload nginx
+
+    # Step 7: Enable site and restart nginx
+    - name: Enable todo site in Nginx
+      file:
+        src: "/etc/nginx/sites-available/todo"
+        dest: "/etc/nginx/sites-enabled/todo"
+        state: link
+      notify:
+        - Reload nginx
+
+    # Step 8: Restart PHP-FPM service
     - name: Restart PHP-FPM service
       service:
         name: php-fpm
         state: restarted
 
-    - name: Clean up the downloaded zip file
+    # Step 9: Clean up downloaded zip file
+    - name: Remove downloaded zip file
       file:
         path: "/tmp/php-todo.zip"
         state: absent
+
+  handlers:
+    # Reload nginx to apply new configuration
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
