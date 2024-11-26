@@ -33,8 +33,8 @@
 #       when: load_balancer_is_required
 
 ---
-- name: tooling
-  import_playbook: ../static-assignments/webservers.yml
+# - name: tooling
+#   import_playbook: ../static-assignments/webservers.yml
 
 - name: todo
   import_playbook: ../static-assignments/deployment.yml
