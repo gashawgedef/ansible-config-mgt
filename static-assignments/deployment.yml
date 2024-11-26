@@ -4,12 +4,12 @@
   hosts: todo
 
   tasks:
-    - name: Install remi and rhel repo
+    - name: Install remi and rhel repo for RHEL 9
       ansible.builtin.yum:
-        name: 
-          - https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+        name:
+          - https://rpms.remirepo.net/enterprise/remi-release-9.rpm
           - dnf-utils
-          - http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+          - https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
         disable_gpg_check: yes
 
     - name: Install httpd on the webserver
@@ -47,10 +47,10 @@
         state: started 
         enabled: yes
 
-    - name: Download the artifact from Artifactory
+    - name: Download the artifact
       get_url:
-        url: "http://54.196.86.61:8081/artifactory/todo-dev-local/php-todo{{ build_number }}/php-todo.zip"
-        dest: /home/ec2-user/php-todo.zip
+        url: http://54.196.86.61:8081/artifactory/todo-dev-local/php-todo{{ build_number }}/php-todo.zip
+        dest: /home/ec2-user/
         url_username: admin
         url_password: Password@372
 
@@ -62,17 +62,17 @@
 
     - name: Deploy the code
       ansible.builtin.copy:
-        src: /home/ec2-user/php-todo/
+        src: /home/ec2-user/var/lib/jenkins/workspace/php-todo_main/
         dest: /var/www/html/
         force: yes
         remote_src: yes
 
-    - name: Remove nginx default page (if any)
+    - name: Remove nginx default page
       ansible.builtin.file:
         path: /etc/httpd/conf.d/welcome.conf
         state: absent
 
-    - name: Restart httpd to apply changes
+    - name: Restart httpd
       ansible.builtin.service:
         name: httpd
         state: restarted
