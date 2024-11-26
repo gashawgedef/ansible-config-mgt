@@ -37,8 +37,7 @@
           - php-intl
           - php-xml
           - php-fpm
-          - unzip  # Ensure unzip is installed
-          - zip    # Include zip if required
+          - unzip
         state: present
         enablerepo: remi
 
@@ -72,7 +71,7 @@
         dest: /var/www/html/
         remote_src: yes
 
-    - name: Remove the default Apache welcome page
+    - name: Remove the default nginx page
       ansible.builtin.file:
         path: /etc/httpd/conf.d/welcome.conf
         state: absent
