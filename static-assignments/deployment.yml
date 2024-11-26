@@ -1,93 +1,78 @@
 ---
-- name: Deploy Todo application
-  hosts: todo
+- name: Deploying the PHP Application to Dev Environment
   become: true
-  vars:
-    artifact_url: "http://54.196.86.61:8081/artifactory/todo-dev-local/php-todo{{ build_number }}/php-todo.zip"
-    deploy_path: "/var/www/todo"
-    php_version: "php-7.4"
-    web_server_package: "nginx"  # Change to "apache" if you're using Apache
+  hosts: todo
+
   tasks:
+    - name: Install remi and rhel repo
+      ansible.builtin.yum:
+        name: 
+          - https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+          - dnf-utils
+          - http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+        disable_gpg_check: yes
 
-    # Step 1: Update package index and install required packages
-    - name: Update apt cache (Debian/Ubuntu) or yum (RHEL/CentOS)
-      package:
-        name: "{{ item }}"
+    - name: Install httpd on the webserver
+      ansible.builtin.yum:
+        name: httpd
         state: present
-      loop:
-        - unzip
-        - wget
-        - curl
-        - git
-        - "{{ php_version }}"
-        - "{{ web_server_package }}"
 
-    # Step 2: Download the application from Artifactory
-    - name: Download artifact from Artifactory
+    - name: Ensure httpd is started and enabled
+      ansible.builtin.service:
+        name: httpd
+        state: started 
+        enabled: yes
+
+    - name: Install PHP
+      ansible.builtin.yum:
+        name:
+          - php 
+          - php-mysqlnd
+          - php-gd 
+          - php-curl
+          - unzip
+          - php-common
+          - php-mbstring
+          - php-opcache
+          - php-intl
+          - php-xml
+          - php-fpm
+          - php-json
+        enablerepo: php:remi-7.4
+        state: present
+
+    - name: Ensure php-fpm is started and enabled
+      ansible.builtin.service:
+        name: php-fpm
+        state: started 
+        enabled: yes
+
+    - name: Download the artifact from Artifactory
       get_url:
-        url: "{{ artifact_url }}"
-        dest: "/tmp/php-todo.zip"
-        headers:
-          Authorization: "Basic {{ lookup('env', 'ARTIFACTORY_API_KEY') }}"
-      register: download_artifact
-      failed_when: download_artifact.status != 200
-      retries: 3
-      delay: 10
-      timeout: 300
+        url: "http://54.196.86.61:8081/artifactory/todo-dev-local/php-todo{{ build_number }}/php-todo.zip"
+        dest: /home/ec2-user/php-todo.zip
+        url_username: admin
+        url_password: Password@372
 
-    # Step 3: Unzip the application
-    - name: Unzip the todo application
-      unarchive:
-        src: "/tmp/php-todo.zip"
-        dest: "{{ deploy_path }}"
+    - name: Unzip the artifacts
+      ansible.builtin.unarchive:
+        src: /home/ec2-user/php-todo.zip
+        dest: /home/ec2-user/
         remote_src: yes
 
-    # Step 4: Set correct permissions
-    - name: Set permissions for the todo application
-      file:
-        path: "{{ deploy_path }}"
-        recurse: yes
-        mode: '0755'
+    - name: Deploy the code
+      ansible.builtin.copy:
+        src: /home/ec2-user/php-todo/
+        dest: /var/www/html/
+        force: yes
+        remote_src: yes
 
-    # Step 5: Install and configure web server (nginx or apache)
-    - name: Ensure web server is running
-      service:
-        name: "{{ web_server_package }}"
-        state: started
-        enabled: true
-
-    # Step 6: Configure Nginx (if nginx is used)
-    - name: Configure Nginx for PHP Todo
-      template:
-        src: "nginx-todo.conf.j2"
-        dest: "/etc/nginx/sites-available/todo"
-      notify:
-        - Reload nginx
-
-    # Step 7: Enable site and restart nginx
-    - name: Enable todo site in Nginx
-      file:
-        src: "/etc/nginx/sites-available/todo"
-        dest: "/etc/nginx/sites-enabled/todo"
-        state: link
-      notify:
-        - Reload nginx
-
-    # Step 8: Restart PHP-FPM service
-    - name: Restart PHP-FPM service
-      service:
-        name: php-fpm
-        state: restarted
-
-    # Step 9: Clean up downloaded zip file
-    - name: Remove downloaded zip file
-      file:
-        path: "/tmp/php-todo.zip"
+    - name: Remove nginx default page (if any)
+      ansible.builtin.file:
+        path: /etc/httpd/conf.d/welcome.conf
         state: absent
 
-  handlers:
-    # Reload nginx to apply new configuration
-    - name: Reload nginx
-      service:
-        name: nginx
-        state: reloaded
+    - name: Restart httpd to apply changes
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
