@@ -56,7 +56,7 @@
 
     - name: Download the application artifact
       ansible.builtin.get_url:
-        url: http://3.88.112.68:8081/artifactory/todo-dev-local/php-todo59/php-todo.zip
+        url: http://54.196.86.61:8081/artifactory/todo-dev-local/php-todo59/php-todo.zip
         dest: /home/ec2-user/php-todo.zip
         mode: '0644'
 
