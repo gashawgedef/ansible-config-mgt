@@ -3,7 +3,7 @@
 172.31.31.182 ansible_ssh_user=ec2-user
 
 [todo]
-172.31.20.62 ansible_ssh_user=ec2-user
+172.31.89.40 ansible_ssh_user=ec2-user
 
 # # [nginx]
 # # 172.31.22.203 ansible_ssh_user='ubuntu' 
