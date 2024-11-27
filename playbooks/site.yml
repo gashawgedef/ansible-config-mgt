@@ -36,8 +36,8 @@
 # - name: tooling
 #   import_playbook: ../static-assignments/webservers.yml
 
-# - name: todo
-#   import_playbook: ../static-assignments/deployment.yml
+- name: todo
+  import_playbook: ../static-assignments/deployment.yml
 
-- name: sonarqube
-  import_playbook: ../static-assignments/sonarqube.yml
+# - name: sonarqube
+#   import_playbook: ../static-assignments/sonarqube.yml
