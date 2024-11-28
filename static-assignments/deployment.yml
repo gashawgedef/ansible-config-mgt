@@ -49,7 +49,7 @@
 
     - name: Download the artifact
       get_url:
-        url: http://18.212.167.179:8081/artifactory/todo-dev-local/php-todo79/php-todo.zip
+        url: http://54.159.102.47:8081/artifactory/todo-dev-local/php-todo79/php-todo.zip
         dest: /home/ec2-user/
         url_username: admin
         url_password: Password@372
